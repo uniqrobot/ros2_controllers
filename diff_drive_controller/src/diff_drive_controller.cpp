@@ -163,18 +163,21 @@ controller_interface::controller_interface_ret_t DiffDriveController::update()
     left_position_mean /= wheels.wheels_per_side;
     right_position_mean /= wheels.wheels_per_side;
    
-    tf2::Quaternion imu_quat(
-      imu_data.orientation.x,
-      imu_data.orientation.y,
-      imu_data.orientation.z,
-      imu_data.orientation.w);
-    double roll, pitch, yaw;//定义存储r\p\y的容器
-    tf2::Matrix3x3 m(imu_quat);
-    m.getRPY(roll, pitch, yaw);//进行转换
-   
+    if(enable_imu)  
+    {
+      tf2::Quaternion imu_quat(
+        imu_data.orientation.x,
+        imu_data.orientation.y,
+        imu_data.orientation.z,
+        imu_data.orientation.w);
+      double roll, pitch, yaw;//定义存储r\p\y的容器
+      tf2::Matrix3x3 m(imu_quat);
+      m.getRPY(roll, pitch, yaw);//进行转换
+      odometry_.update_add_imu(left_position_mean, right_position_mean,yaw,clock.now());
+    }
 
     if(!enable_imu) odometry_.update(left_position_mean, right_position_mean, clock.now());
-    if(enable_imu)  odometry_.update_add_imu(left_position_mean, right_position_mean,yaw,clock.now());
+    
     //if(!enable_imu)  odometry_.update(left_position_mean, right_position_mean, current_time);
   }
 
