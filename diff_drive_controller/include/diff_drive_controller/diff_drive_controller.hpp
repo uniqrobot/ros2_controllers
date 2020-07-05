@@ -181,6 +181,7 @@ private:
   rclcpp::Subscription<sensor_msgs::msg::Imu>::SharedPtr imu_sub;
   void imuCallback(const sensor_msgs::msg::Imu::SharedPtr _imu);
   sensor_msgs::msg::Imu imu_data;
+  bool is_update_imu=false;   //是否更新了imu
 };
 } // namespace diff_drive_controller
 #endif // DIFF_DRIVE_CONTROLLER__DIFF_DRIVE_CONTROLLER_HPP_

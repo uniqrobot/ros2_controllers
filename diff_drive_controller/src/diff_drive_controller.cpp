@@ -165,15 +165,24 @@ controller_interface::controller_interface_ret_t DiffDriveController::update()
    
     if(enable_imu)  
     {
-      tf2::Quaternion imu_quat(
-        imu_data.orientation.x,
-        imu_data.orientation.y,
-        imu_data.orientation.z,
-        imu_data.orientation.w);
-      double roll, pitch, yaw;//定义存储r\p\y的容器
-      tf2::Matrix3x3 m(imu_quat);
-      m.getRPY(roll, pitch, yaw);//进行转换
-      odometry_.update_add_imu(left_position_mean, right_position_mean,yaw,clock.now());
+      if(is_update_imu)
+      {
+        is_update_imu=false;
+        tf2::Quaternion imu_quat(
+          imu_data.orientation.x,
+          imu_data.orientation.y,
+          imu_data.orientation.z,
+          imu_data.orientation.w);
+        double roll, pitch, yaw;//定义存储r\p\y的容器
+        tf2::Matrix3x3 m(imu_quat);
+        m.getRPY(roll, pitch, yaw);//进行转换
+        odometry_.update_add_imu(left_position_mean, right_position_mean,yaw,clock.now());
+      }
+      else
+      {
+        RCLCPP_ERROR(logger, "no_imu_data. no_connect or error_port ? ");
+      }
+      
     }
 
     if(!enable_imu) odometry_.update(left_position_mean, right_position_mean, clock.now());
@@ -558,6 +567,7 @@ void DiffDriveController::halt()
 void DiffDriveController::imuCallback(const sensor_msgs::msg::Imu::SharedPtr _imu)
 {
   imu_data=*_imu;
+  is_update_imu=true;
 }
 
 
